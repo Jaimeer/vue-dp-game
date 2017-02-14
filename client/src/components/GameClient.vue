@@ -3,8 +3,8 @@
     <!-- <Fullscreen/> -->
     <Move @update="updatePosMove" />
     <Shoot @update="updatePosShoot" />
-    <div>Move: {{ posMove.x }} - {{ posMove.y }}</div>
-    <div>Move: {{ posShoot.x }} - {{ posShoot.y }}</div>
+    <div class="info">Move: {{ posMove.x }} - {{ posMove.y }} </div>
+    <div class="info">Shoot: {{ posShoot.x }} - {{ posShoot.y }} </div>
   </div>
 </template>
 <script>
@@ -22,6 +22,7 @@
     data() {
       return {
         userId: null,
+        setTimeOut: 1000,
         posMove: {
           x: 0,
           y: 0
@@ -29,14 +30,18 @@
         posShoot: {
           x: 0,
           y: 0
-        }
+        },
+        aux: 0
       }
     },
-    created () {
+    created() {
       this.userId = getUserId()
       gameListRecord.addEntry(this.userId)
+
+      this.sendPostion()
     },
-    destroyed(){
+    destroyed() {
+      console.log('DESTROYED')
       gameListRecord.removeEntry(this.userId)
     },
     methods: {
@@ -48,15 +53,28 @@
         this.posShoot = pos
         this.sendPostion()
       },
+      isValidPosition() {
+        return this.posMove.x !== 0 ||
+          this.posMove.y !== 0 ||
+          this.posShoot.x !== 0 ||
+          this.posShoot.y !== 0
+      },
       sendPostion() {
-        const data = {
-          player: this.userId,
-          posMove: this.posMove,
-          posShoot: this.posShoot
+        if (this.isValidPosition()) {
+          this.send = false
+          const data = {
+            player: this.userId,
+            posMove: this.posMove,
+            posShoot: this.posShoot
+          }
+          console.log('setPlayerPosition', data)
+          client.rpc.make('setPlayerPosition', data, (error, result) => {
+            if(error){
+              console.log('setPlayerPosition', 'error', error)
+            }
+          })
         }
-        client.rpc.make('setPlayerPosition', data, (error, result) => {
-          console.log('setPlayerPosition', 'error', error, 'result', result)
-        })
+        // setInterval(this.sendPostion, this.setTimeOut)
       }
     },
     components: {
@@ -86,5 +104,8 @@
     width: 50%;
     /*height: 50%;*/
   }
-
+  
+  .info {
+    color: white;
+  }
 </style>

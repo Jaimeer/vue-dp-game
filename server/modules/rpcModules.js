@@ -5,48 +5,51 @@ const client = deepstream('localhost:6020').login()
 exports.init = () => {
     client.rpc.provide('setPlayerPosition', (data, response) => {
         console.log('setPlayerPosition', 'data', data)
-        let gameListRecord = client.record.getList('game-player-item/' + data.player).whenReady(() => {
-            let player = gameListRecord.get()
+        let gamePlayerRecord = client.record.getRecord('game-player-item/' + data.player)
+        gamePlayerRecord.whenReady(() => {
+            let player = gamePlayerRecord.get()
 
             let oldPos = {
                 posX: player.posX || 0,
                 posY: player.posY || 0,
-                fireX: player.fireX || 0,
-                fireY: player.fireY || 0
+                shootX: player.shootX || 0,
+                shootY: player.shootY || 0
             }
 
-            gameListRecord.set({
+            let newPos = {
                 posX: player.posX + data.posMove.x,
                 posY: player.posY + data.posMove.y,
-                shootX: player.fireX + data.posShoot.x,
-                shootY: player.fireY + data.posShoot.y
-            })
-        })
-    })
-    /*
-    client.rpc.provide('addChat', function (data, response) {
-        console.log('addChat', data)
-        data.id = client.getUid()
-        const chatRecord = client.record.getRecord('chat-item/' + data.id)
-        chatRecord.set(data)
-        chatListData.addEntry(data.id)
-        client.event.emit("chat-msg", 'Added chat[' + data + ']');
-        response.send('OK');
-    });
-    client.rpc.provide('removeChat', function (data, response) {
-        console.log('removeChat', data)
-        const chatRecord = client.record.getRecord('chat-item/' + data)
-        chatRecord.whenReady(() => {
-            console.log('removeChat', 'READY')
-            chatRecord.delete()
-            client.event.emit("chat-msg", 'Removed chat[' + data + ']');
+                shootX: player.shootX + data.posShoot.x,
+                shootY: player.shootY + data.posShoot.y
+            }
+
+            if (newPos.posX > 100) newPos.posX = 100
+            if (newPos.posY > 100) newPos.posY = 100
+            if (newPos.posX < 0) newPos.posX = 0
+            if (newPos.posY < 0) newPos.posY = 0
+            // console.log('setPlayerPosition', 'oldPos', oldPos, 'newPos', newPos)
+
+            gamePlayerRecord.set(newPos)
             response.send('OK')
         })
-    });
-    client.rpc.provide('removeEmit', function (data, response) {
-        console.log('removeEmit', data)
-        client.event.emit("chat-msg", 'Remote Emit');
-        response.send('OK')
-    });
-    */
+    })
+
+    // Remove User if logout
+    client.presence.subscribe((username, isLoggedIn) => {
+        console.log('presence:subscribe', username, isLoggedIn)
+        if (!isLoggedIn) {
+            client.record.has('game-player-item/' + username, () => {
+                let gamePlayerRecord = client.record.getRecord('game-player-item/' + username)
+                gamePlayerRecord.whenReady(() => {
+                    gamePlayerRecord.delete()
+
+                    // Delete from list
+                    let gamePlayerListRecord = client.record.getList('game-players/game1')
+                    gamePlayerListRecord.whenReady(() => {
+                        gamePlayerListRecord.removeEntry(username)
+                    })
+                })
+            })
+        }
+    })
 }
