@@ -1,0 +1,7 @@
+{
+    "users": "user-connections",
+    "startships": {
+        "games": "game-starpships",
+        "players": "game-starpships-players"
+    }
+}

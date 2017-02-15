@@ -1,5 +1,5 @@
-const rpcModules = require('./modules/rpcModules')
+const gameStartships = require('./modules/game-startships')
 const userConnections = require('./modules/userConnections')
 
-rpcModules.init()
+gameStartships.init()
 userConnections.init()

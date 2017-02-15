@@ -11,12 +11,13 @@
   import {
     client,
     getUserId
-  } from '../deepStream/conn.js'
-  import Shoot from './controls/Shoot.vue'
-  import Move from './controls/Move.vue'
+  } from '../../deepStream/conn.js'
+  import collections from '../../config/collections.json'
+  import Shoot from '../controls/Shoot.vue'
+  import Move from '../controls/Move.vue'
   // import Fullscreen from 'Fullscreen'
 
-  let gameListRecord = client.record.getList('game-players/game1')
+  let gameListRecord = null
 
   export default {
     data() {
@@ -35,6 +36,8 @@
       }
     },
     created() {
+      gameListRecord = client.record.getList(collections.startships.game + '/game1')
+
       this.userId = getUserId()
       gameListRecord.addEntry(this.userId)
 
@@ -64,12 +67,12 @@
           this.send = false
           const data = {
             player: this.userId,
-            posMove: this.posMove,
-            posShoot: this.posShoot
+            move: this.posMove,
+            shoot: this.posShoot
           }
           console.log('setPlayerPosition', data)
           client.rpc.make('setPlayerPosition', data, (error, result) => {
-            if(error){
+            if (error) {
               console.log('setPlayerPosition', 'error', error)
             }
           })
