@@ -1,5 +1,5 @@
 var deepstream = require('deepstream.io-client-js')
-const client = deepstream('localhost:6020').login()
+const client = deepstream('0.0.0.0:6020').login()
 
 let userConnectedData = client.record.getRecord('user-connections');
 

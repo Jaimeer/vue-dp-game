@@ -1,8 +1,9 @@
 import deepstream from 'deepstream.io-client-js'
 
-const domain = 'localhost' // '192.168.10.211'
+const domain = 'localhost'
+// const domainName = '192.168.10.211'
 const port = '6020'
-export const client = deepstream(domain + ':' + port)
+export const client = deepstream(domainName + ':' + port)
 
 let userId = client.getUid()
 

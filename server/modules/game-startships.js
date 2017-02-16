@@ -1,7 +1,7 @@
 var deepstream = require('deepstream.io-client-js')
 var collections = require('../config/collections.json')
 
-const client = deepstream('localhost:6020').login()
+const client = deepstream('0.0.0.0:6020').login()
 
 
 exports.init = () => {

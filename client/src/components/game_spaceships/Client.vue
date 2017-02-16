@@ -1,10 +1,14 @@
 <template>
-  <div id="box">
-    <!-- <Fullscreen/> -->
+  <div id="box" v-if="connectionState === 'OPEN'">
+    <Fullscreen/>
     <Move @update="updatePosMove" />
     <Shoot @update="updatePosShoot" />
     <div class="info">Move: {{ posMove.x }} - {{ posMove.y }} </div>
     <div class="info">Shoot: {{ posShoot.x }} - {{ posShoot.y }} </div>
+    <div class="info">{{ connectionState }}</div>
+  </div>
+  <div v-else>
+    <div id="box" class="info">{{ connectionState }}</div>
   </div>
 </template>
 <script>
@@ -15,15 +19,18 @@
   import collections from '../../config/collections.json'
   import Shoot from '../controls/Shoot.vue'
   import Move from '../controls/Move.vue'
-  // import Fullscreen from 'Fullscreen'
+  import Fullscreen from '../controls/Fullscreen.vue'
 
   let gameListRecord = null
+  let myInterval = null
+  let millisecondsInterval = 1 / 60
 
   export default {
     data() {
       return {
         userId: null,
         setTimeOut: 1000,
+        connectionState: '',
         posMove: {
           x: 0,
           y: 0
@@ -41,7 +48,14 @@
       this.userId = getUserId()
       gameListRecord.addEntry(this.userId)
 
-      this.sendPostion()
+      client.on('connectionStateChanged', (state) => {
+        this.connectionState = state
+      })
+
+      console.log('millisecondsInterval', millisecondsInterval)
+      myInterval = setInterval(() => {
+        this.sendPostion()
+      }, millisecondsInterval);
     },
     destroyed() {
       console.log('DESTROYED')
@@ -50,11 +64,11 @@
     methods: {
       updatePosMove(pos) {
         this.posMove = pos
-        this.sendPostion()
+        // this.sendPostion()
       },
       updatePosShoot(pos) {
         this.posShoot = pos
-        this.sendPostion()
+        // this.sendPostion()
       },
       isValidPosition() {
         return this.posMove.x !== 0 ||
@@ -80,10 +94,13 @@
         // setInterval(this.sendPostion, this.setTimeOut)
       }
     },
+    destroy() {
+      clearInterval(this.myInterval);
+    },
     components: {
       Shoot,
-      Move
-      // Fullscreen
+      Move,
+      Fullscreen
     }
   }
 
@@ -111,4 +128,5 @@
   .info {
     color: white;
   }
+
 </style>
