@@ -1,7 +1,8 @@
 var deepstream = require('deepstream.io-client-js')
-var collections = require('../config/collections.json')
+var config = require('../../config/config.json')
+var collections = require('../../config/collections.json')
 
-const client = deepstream('0.0.0.0:6020').login()
+const client = deepstream(config.domain + ':' + config.port).login()
 
 
 exports.init = () => {
@@ -75,7 +76,7 @@ exports.init = () => {
                     gamePlayerRecord.delete()
 
                     // Delete from list
-                    let gamePlayerListRecord = client.record.getList(collections.startships.game + '/game1')
+                    let gamePlayerListRecord = client.record.getList(collections.startships.games + '/game1')
                     gamePlayerListRecord.whenReady(() => {
                         gamePlayerListRecord.removeEntry(username)
                     })
